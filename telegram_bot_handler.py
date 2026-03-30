@@ -85,42 +85,51 @@ class TelegramBotHandler:
     # ── Messaging ──
 
     def send(self, text: str):
+        """Send a message to the configured chat. Logs API errors for visibility."""
         if not self.enabled:
             return
         try:
-            requests.post(
+            # Pre-sanitize: Minimal escaping for HTML mode which is more robust than Markdown for dynamic text
+            safe_text = text.replace("<", "&lt;").replace(">", "&gt;")
+            
+            resp = requests.post(
                 f"{self._base_url}/sendMessage",
-                json={"chat_id": self.chat_id, "text": text, "parse_mode": "Markdown"},
-                timeout=5
+                json={"chat_id": self.chat_id, "text": safe_text, "parse_mode": "HTML"},
+                timeout=10
             )
+            if resp.status_code != 200:
+                logger.error(f"Telegram API Error ({resp.status_code}): {resp.text}")
         except Exception as e:
-            logger.warning(f"Failed to send Telegram reply: {e}")
+            logger.warning(f"Failed to send Telegram message: {e}")
 
     def _get_updates(self):
+        """Fetch new messages from Telegram with a longer timeout for polling."""
         try:
             resp = requests.get(
                 f"{self._base_url}/getUpdates",
-                params={"offset": self._offset, "timeout": 20},
-                timeout=25
+                params={"offset": self._offset, "timeout": 30},
+                timeout=35
             )
             if resp.status_code == 200:
                 return resp.json().get("result", [])
+            else:
+                logger.error(f"Telegram getUpdates failed ({resp.status_code}): {resp.text}")
         except Exception as e:
-            logger.warning(f"Telegram getUpdates error: {e}")
+            logger.warning(f"Telegram connection error: {e}")
         return []
 
     # ── Command Handlers ──
 
     def _cmd_status(self):
-        status = "🟢 Running" if self.bot_manager.running else "🔴 Stopped"
+        status = "<b>🟢 Running</b>" if self.bot_manager.running else "<b>🔴 Stopped</b>"
         mode = getattr(config, "ETH_MODE", "N/A")
         mode_tag = "🧪 TESTNET" if mode == "TESTNET" else "💰 LIVE"
         self.send(
-            f"📊 *Bot Status*\n"
+            f"📊 <b>Bot Status</b>\n"
             f"━━━━━━━━━━━━━━\n"
             f"🔘 Status: {status}\n"
-            f"📌 Symbol: `{getattr(config, 'ETH_SYMBOL', 'N/A')}`\n"
-            f"📈 Strategy: `{getattr(config, 'ACTIVE_STRATEGY', 'N/A')}`\n"
+            f"📌 Symbol: <code>{getattr(config, 'ETH_SYMBOL', 'N/A')}</code>\n"
+            f"📈 Strategy: <code>{getattr(config, 'ACTIVE_STRATEGY', 'N/A')}</code>\n"
             f"🏷️ Mode: {mode_tag}"
         )
 
@@ -147,15 +156,15 @@ class TelegramBotHandler:
             roi_sign = "+" if roi >= 0 else ""
 
             self.send(
-                f"⚡️ *Version: 1.2*\n"
-                f"💰 *Balance Status*\n"
+                f"⚡️ <b>Version: 1.3</b>\n"
+                f"💰 <b>Balance Status</b>\n"
                 f"━━━━━━━━━━━━━━\n"
-                f"💵 Total: `{round(balance, 2)} USDT`\n"
-                f"🏦 Initial: `{initial} USDT`\n"
-                f"📈 Total ROI: `{pnl_sign}{round(pnl_pct, 2)}%`\n"
+                f"💵 Total: <code>{round(balance, 2)} USDT</code>\n"
+                f"🏦 Initial: <code>{initial} USDT</code>\n"
+                f"📈 Total ROI: <b>{pnl_sign}{round(pnl_pct, 2)}%</b>\n"
                 f"━━━━━━━━━━━━━━\n"
-                f"🛡️ Invested: `{round(notional, 2)} USDT`\n"
-                f"📊 Actual ROI: `{roi_sign}{round(roi, 2)}%`"
+                f"🛡️ Invested: <code>{round(notional, 2)} USDT</code>\n"
+                f"📊 Actual ROI: <b>{roi_sign}{round(roi, 2)}%</b>"
             )
         except Exception as e:
             self.send(f"❌ 잔고 조회 실패: `{e}`")
@@ -178,16 +187,16 @@ class TelegramBotHandler:
             roi_sign = "+" if roi >= 0 else ""
 
             msg = (
-                f"⚡️ *Version: 1.2*\n"
-                f"{side_emoji} *Position Metrics*\n"
+                f"⚡️ <b>Version: 1.3</b>\n"
+                f"{side_emoji} <b>Position Metrics</b>\n"
                 f"━━━━━━━━━━━━━━\n"
-                f"📌 Symbol: `{getattr(config, 'ETH_SYMBOL', 'N/A')}`\n"
-                f"🔘 Side: `{side}`\n"
-                f"📊 Size: `{pos.get('size', 0)}`\n"
-                f"💵 Entry: `{pos.get('entry_price', 0)}`\n"
-                f"🛡️ Invested: `{round(notional, 2)} USDT`\n"
-                f"💰 Unrealized: `{round(pos.get('unrealized_pnl', 0), 2)} USDT`\n"
-                f"📊 Actual ROI: `{roi_sign}{round(roi, 2)}%`"
+                f"📌 Symbol: <code>{getattr(config, 'ETH_SYMBOL', 'N/A')}</code>\n"
+                f"🔘 Side: <b>{side}</b>\n"
+                f"📊 Size: <code>{pos.get('size', 0)}</code>\n"
+                f"💵 Entry: <code>{pos.get('entry_price', 0)}</code>\n"
+                f"🛡️ Invested: <code>{round(notional, 2)} USDT</code>\n"
+                f"💰 Unrealized: <code>{round(pos.get('unrealized_pnl', 0), 2)} USDT</code>\n"
+                f"📊 Actual ROI: <b>{roi_sign}{round(roi, 2)}%</b>"
             )
             
             self.send(msg)
@@ -199,14 +208,14 @@ class TelegramBotHandler:
             resp = requests.get("http://localhost:8000/api/market?interval=24h", timeout=5)
             d = resp.json()
             self.send(
-                f"📊 *Market (24h)*\n"
+                f"📊 <b>Market (24h)</b>\n"
                 f"━━━━━━━━━━━━━━\n"
-                f"📌 Symbol: `{getattr(config, 'ETH_SYMBOL', 'N/A')}`\n"
-                f"💵 Price: `{round(d.get('last', 0), 2)} USDT`\n"
-                f"📈 Change: `{round(d.get('percentage', 0), 2)}%`\n"
-                f"🔺 High: `{round(d.get('high', 0), 2)}`\n"
-                f"🔻 Low: `{round(d.get('low', 0), 2)}`\n"
-                f"📦 Volume: `{round(d.get('volume', 0)):,}`"
+                f"📌 Symbol: <code>{getattr(config, 'ETH_SYMBOL', 'N/A')}</code>\n"
+                f"💵 Price: <code>{round(d.get('last', 0), 2)} USDT</code>\n"
+                f"📈 Change: <b>{round(d.get('percentage', 0), 2)}%</b>\n"
+                f"🔺 High: <code>{round(d.get('high', 0), 2)}</code>\n"
+                f"🔻 Low: <code>{round(d.get('low', 0), 2)}</code>\n"
+                f"📦 Volume: <code>{round(d.get('volume', 0)):,}</code>"
             )
         except Exception as e:
             self.send(f"❌ 시장 조회 실패: `{e}`")
@@ -219,11 +228,11 @@ class TelegramBotHandler:
             change_prob = d.get("change_prob", 0)
             sent_label = "😱 극단적 공포" if sentiment < 20 else ("😨 공포" if sentiment < 40 else ("😐 중립" if sentiment < 60 else ("😊 탐욕" if sentiment < 80 else "🤑 극단적 탐욕")))
             self.send(
-                f"🧠 *Market Sentiment*\n"
+                f"🧠 <b>Market Sentiment</b>\n"
                 f"━━━━━━━━━━━━━━\n"
-                f"❤️ Sentiment: `{sentiment}` — {sent_label}\n"
-                f"🎯 Change Prob: `{change_prob}%`\n"
-                f"📌 Position: `{d.get('position', {}).get('side', 'FLAT')}`"
+                f"❤️ Sentiment: <b>{sentiment}</b> — {sent_label}\n"
+                f"🎯 Change Prob: <code>{change_prob}%</code>\n"
+                f"📌 Position: <code>{d.get('position', {}).get('side', 'FLAT')}</code>"
             )
         except Exception as e:
             self.send(f"❌ 심리 조회 실패: `{e}`")
@@ -231,10 +240,10 @@ class TelegramBotHandler:
     def _cmd_mode(self, arg: str):
         if arg == "testnet":
             _update_env("ETH_MODE", "TESTNET")
-            self.send("✅ *테스트넷으로 전환되었습니다!* 🧪\n봇을 재시작하면 적용됩니다.")
+            self.send("✅ <b>테스트넷으로 전환되었습니다!</b> 🧪\n봇을 재시작하면 적용됩니다.")
         elif arg == "mainnet":
             _update_env("ETH_MODE", "MAINNET")
-            self.send("✅ *상용 모드로 전환되었습니다!* 💰\n봇을 재시작하면 적용됩니다.")
+            self.send("✅ <b>상용 모드로 전환되었습니다!</b> 💰\n봇을 재시작하면 적용됩니다.")
         else:
             self.send("❌ 올바른 모드: `/mode testnet` 또는 `/mode mainnet`")
 
@@ -267,16 +276,22 @@ class TelegramBotHandler:
             logger.warning(f"Unauthorized Telegram access from chat_id={chat_id}")
             return
 
+        if not text.startswith("/"):
+            return
+
+        # Improved Command Extraction: Handle /cmd@BotName or just /cmd
         parts = text.split(maxsplit=1)
-        cmd = parts[0].lower().lstrip("/")
+        full_cmd = parts[0].lower().lstrip("/")
+        cmd = full_cmd.split("@")[0] # Extract 'start_bot' from 'start_bot@MyBot'
+        
         arg = parts[1].strip().lower() if len(parts) > 1 else ""
 
-        if cmd in ["start_bot", "start\\_bot"]:
+        if cmd in ["start_bot", "start_bot"]:
             result = self.bot_manager.start()
-            self.send(f"🟢 *{result.get('message', 'Bot started')}*")
-        elif cmd in ["stop_bot", "stop\\_bot"]:
+            self.send(f"🟢 <b>{result.get('message', 'Bot started')}</b>")
+        elif cmd in ["stop_bot", "stop_bot"]:
             result = self.bot_manager.stop()
-            self.send(f"🔴 *{result.get('message', 'Bot stopped')}*")
+            self.send(f"🔴 <b>{result.get('message', 'Bot stopped')}</b>")
         elif cmd == "status":
             self._cmd_status()
         elif cmd == "balance":
@@ -296,7 +311,7 @@ class TelegramBotHandler:
         elif cmd in ["help", "start"]:
             self.send(HELP_TEXT)
         else:
-            self.send(f"❓ 알 수 없는 명령어: `{text}`\n`/help` 를 입력하면 사용 가능한 명령어를 확인할 수 있습니다.")
+            self.send(f"❓ 알 수 없는 명령어: <code>{text}</code>\n<code>/help</code> 를 입력하면 사용 가능한 명령어를 확인할 수 있습니다.")
 
     # ── Polling Loop ──
 
@@ -307,9 +322,9 @@ class TelegramBotHandler:
         
         # Initial greeting indicating the daemon is alive
         self.send(
-            "🤖 *Bot Commander Ready*\n"
+            "🤖 <b>Bot Commander Ready</b>\n"
             "━━━━━━━━━━━━━━\n"
-            "I'm now monitoring commands. Type `/help` for list."
+            "I'm now monitoring commands. Type <code>/help</code> for list."
         )
 
         error_wait = 5 # Initial wait on error
@@ -327,10 +342,11 @@ class TelegramBotHandler:
                         logger.error(f"Error handling Telegram command: {e}")
                         
             except Exception as e:
-                logger.error(f"Telegram Polling Error: {e}. Retrying in {error_wait}s...")
+                import time
+                wait_time = min(60, error_wait * 2)
+                logger.error(f"Telegram Polling Error: {e}. Retrying in {wait_time}s...")
                 time.sleep(error_wait)
-                # Exponential backoff (max 60s)
-                error_wait = min(60, error_wait * 2)
+                error_wait = wait_time
         
         logger.info("Telegram command handler stopped.")
 
