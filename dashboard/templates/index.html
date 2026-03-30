@@ -1251,6 +1251,16 @@
                                 ${helper ? `<div style="font-size: 10px; color: #8b949e; margin-top: 4px;">${helper}</div>` : ''}
                             </div>
                         `;
+                        
+                        // Add Telegram Test Button after Chat ID
+                        if (key === 'TELEGRAM_CHAT_ID') {
+                            sectionHtml += `
+                                <div class="form-group" style="grid-column: span 2; margin-top: -10px; margin-bottom: 20px;">
+                                    <button class="btn" onclick="testTelegram()" style="background: rgba(88, 166, 255, 0.1); border: 1px solid var(--accent-color); color: var(--accent-color); font-size: 12px; padding: 6px 12px; width: auto; cursor: pointer;">
+                                        🔔 Test Telegram Connection
+                                    </button>
+                                </div>`;
+                        }
                     });
 
                     sectionHtml += `</div></div>`;
@@ -1872,6 +1882,21 @@
                 }
             } catch (e) {
                 showNotification("Error executing force exit", 'danger');
+            }
+        }
+
+        async function testTelegram() {
+            showNotification('Sending test message...', 'success');
+            try {
+                const response = await fetch('/api/telegram/test', { method: 'POST' });
+                const result = await response.json();
+                if (result.message) {
+                    showNotification('✅ ' + result.message);
+                } else {
+                    showNotification('❌ ' + (result.error || 'Test failed'), 'danger');
+                }
+            } catch (error) {
+                showNotification('Error testing Telegram: ' + error, 'danger');
             }
         }
 

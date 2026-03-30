@@ -231,6 +231,25 @@ async def force_exit():
         return {"message": "Force exit successful", "order": str(result)}
     return {"error": "Force exit failed"}
 
+@app.post("/api/telegram/test")
+async def test_telegram():
+    config.reload()
+    from telegram_notifier import TelegramNotifier
+    
+    token = getattr(config, 'TELEGRAM_BOT_TOKEN', '')
+    chat_id = getattr(config, 'TELEGRAM_CHAT_ID', '')
+    
+    if not token or not chat_id or token == "********" or token == "your_telegram_bot_token":
+        return {"error": "Telegram Token or Chat ID is missing or not configured."}
+    
+    tg = TelegramNotifier(token=token, chat_id=chat_id)
+    success = tg.send("🔔 *Binance Bot Connectivity Test*\nYour Telegram configuration is working correctly!")
+    
+    if success:
+        return {"message": "Test message sent! Please check your Telegram."}
+    else:
+        return {"error": "Failed to send message. Please check logs for detailed error."}
+
 @app.get("/api/orderbook")
 def get_orderbook():
     engine = get_engine()
