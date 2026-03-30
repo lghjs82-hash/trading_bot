@@ -1,0 +1,153 @@
+90 INFO: PyInstaller: 6.19.0, contrib hooks: 2026.3
+90 INFO: Python: 3.9.6
+106 INFO: Platform: macOS-26.2-arm64-arm-64bit
+106 INFO: Python environment: /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9
+107 INFO: wrote /Users/seong-woo/Desktop/binance-trading-bot/BinanceTradingBot.spec
+110 INFO: Removing temporary files and cleaning cache in /Users/seong-woo/Library/Application Support/pyinstaller
+112 INFO: Module search paths (PYTHONPATH):
+['/Users/seong-woo/Desktop/binance-trading-bot',
+ '/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python39.zip',
+ '/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9',
+ '/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/lib-dynload',
+ '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages',
+ '/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages',
+ '/Users/seong-woo/Desktop/binance-trading-bot']
+313 INFO: Appending 'datas' from .spec
+314 INFO: checking Analysis
+314 INFO: Building Analysis because Analysis-00.toc is non existent
+314 INFO: Looking for Python shared library...
+324 INFO: Using Python shared library: /Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/Python3
+324 INFO: Running Analysis Analysis-00.toc
+324 INFO: Target bytecode optimization level: 0
+324 INFO: Initializing module dependency graph...
+324 INFO: Initializing module graph hook caches...
+347 INFO: Analyzing modules for base_library.zip ...
+901 INFO: Processing standard module hook 'hook-encodings.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+1637 INFO: Processing standard module hook 'hook-pickle.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+2136 INFO: Processing standard module hook 'hook-heapq.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+2327 INFO: Caching module dependency graph...
+2362 INFO: Analyzing /Users/seong-woo/Desktop/binance-trading-bot/dashboard_app.py
+2593 INFO: Processing standard module hook 'hook-pydantic.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+2814 INFO: Processing pre-safe-import-module hook 'hook-typing_extensions.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+2815 INFO: SetuptoolsInfo: initializing cached setuptools info...
+3212 INFO: Processing standard module hook 'hook-multiprocessing.util.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+3339 INFO: Processing standard module hook 'hook-xml.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+3477 INFO: Processing standard module hook 'hook-_ctypes.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+3754 INFO: Processing standard module hook 'hook-platform.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+4044 INFO: Processing standard module hook 'hook-zoneinfo.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+4060 INFO: Processing standard module hook 'hook-sysconfig.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+4069 INFO: Processing standard module hook 'hook-_osx_support.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+4719 INFO: Processing standard module hook 'hook-anyio.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+5618 INFO: Processing standard module hook 'hook-jinja2.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+6105 INFO: Processing standard module hook 'hook-cryptography.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+6579 INFO: hook-cryptography: cryptography does not seem to be using dynamically linked OpenSSL.
+7654 INFO: Processing standard module hook 'hook-urllib3.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+7709 INFO: Processing pre-safe-import-module hook 'hook-backports.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+7710 INFO: Setuptools: 'backports' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.backports'!
+7713 INFO: Processing standard module hook 'hook-setuptools.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+7721 INFO: Processing pre-safe-import-module hook 'hook-distutils.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+7721 INFO: Processing pre-find-module-path hook 'hook-distutils.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_find_module_path'
+7892 INFO: Processing standard module hook 'hook-distutils.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+7907 INFO: Processing standard module hook 'hook-distutils.util.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+7940 INFO: Processing pre-safe-import-module hook 'hook-packaging.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8064 INFO: Processing pre-safe-import-module hook 'hook-jaraco.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8065 INFO: Setuptools: 'jaraco' appears to be a full setuptools-vendored copy - creating alias to 'setuptools._vendor.jaraco'!
+8070 INFO: Processing standard module hook 'hook-setuptools._vendor.jaraco.text.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+8071 INFO: Processing pre-safe-import-module hook 'hook-importlib_resources.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8072 INFO: Processing standard module hook 'hook-importlib_resources.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+8091 INFO: Processing pre-safe-import-module hook 'hook-zipp.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8306 INFO: Processing pre-safe-import-module hook 'hook-more_itertools.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8306 INFO: Setuptools: 'more_itertools' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.more_itertools'!
+8415 INFO: Processing pre-safe-import-module hook 'hook-importlib_metadata.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8429 INFO: Processing standard module hook 'hook-importlib_metadata.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+8590 INFO: Processing pre-safe-import-module hook 'hook-tomli.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+8590 INFO: Setuptools: 'tomli' appears to be a setuptools-vendored copy - creating alias to 'setuptools._vendor.tomli'!
+8979 INFO: Processing pre-safe-import-module hook 'hook-wheel.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+9069 INFO: Processing standard module hook 'hook-pkg_resources.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+9384 INFO: Processing standard module hook 'hook-charset_normalizer.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+9612 INFO: Processing standard module hook 'hook-certifi.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+14378 INFO: Processing standard module hook 'hook-pandas.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+15327 INFO: Processing standard module hook 'hook-numpy.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+16001 INFO: Processing standard module hook 'hook-difflib.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+17014 INFO: Processing standard module hook 'hook-pytz.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+18754 INFO: Processing standard module hook 'hook-pandas.io.formats.style.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+20275 INFO: Processing standard module hook 'hook-pandas.plotting.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+20313 INFO: Processing standard module hook 'hook-matplotlib.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+23465 INFO: Processing pre-safe-import-module hook 'hook-gi.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+23699 INFO: Processing standard module hook 'hook-PIL.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+23761 INFO: Processing standard module hook 'hook-PIL.Image.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+23975 INFO: Processing standard module hook 'hook-xml.etree.cElementTree.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+24078 INFO: Processing standard module hook 'hook-PIL.ImageFilter.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+24786 INFO: Processing standard module hook 'hook-matplotlib.backends.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+24841 INFO: Processing standard module hook 'hook-matplotlib.pyplot.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+25381 INFO: Processing standard module hook 'hook-matplotlib.backend_bases.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+25957 INFO: Processing standard module hook 'hook-dateutil.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+26003 INFO: Processing pre-safe-import-module hook 'hook-six.moves.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+27604 INFO: Processing standard module hook 'hook-sqlite3.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+27776 INFO: Processing standard module hook 'hook-pandas.io.clipboard.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+28488 INFO: Processing standard module hook 'hook-pycparser.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+29141 INFO: Processing standard module hook 'hook-lxml.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+29320 INFO: Processing standard module hook 'hook-lxml.etree.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+29327 INFO: Processing standard module hook 'hook-xml.dom.domreg.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+30473 INFO: Processing pre-safe-import-module hook 'hook-platformdirs.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_safe_import_module'
+30478 INFO: Processing standard module hook 'hook-platformdirs.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+30531 INFO: Processing standard module hook 'hook-websockets.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+31245 INFO: Processing standard module hook 'hook-uvicorn.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+31936 INFO: Analyzing hidden import 'uvicorn.lifespan.on'
+31940 INFO: Processing module hooks (post-graph stage)...
+32281 INFO: Processing standard module hook 'hook-lxml.isoschematron.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+32811 WARNING: Hidden import "importlib_resources.trees" not found!
+33019 INFO: Processing standard module hook 'hook-PIL.SpiderImagePlugin.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+33045 INFO: Processing standard module hook 'hook-matplotlib.backends.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+33046 INFO: Matplotlib backend selection method: automatic discovery of used backends
+33271 INFO: Trying determine the default backend as first importable candidate from the list: ['MacOSX', 'QtAgg', 'Qt5Agg', 'Gtk4Agg', 'Gtk3Agg', 'TkAgg', 'WxAgg']
+Matplotlib is building the font cache; this may take a moment.
+51156 INFO: Selected matplotlib backends: ['MacOSX']
+51171 INFO: Processing standard module hook 'hook-lxml.objectify.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/stdhooks'
+51202 INFO: Performing binary vs. data reclassification (847 entries)
+51313 INFO: Looking for ctypes DLLs
+51325 WARNING: Library user32 required via ctypes not found
+51327 WARNING: Library msvcrt required via ctypes not found
+51346 INFO: Analyzing run-time hooks ...
+51357 INFO: Including run-time hook 'pyi_rth_inspect.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/rthooks'
+51359 INFO: Including run-time hook 'pyi_rth_pkgutil.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/rthooks'
+51360 INFO: Including run-time hook 'pyi_rth_multiprocessing.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/rthooks'
+51361 INFO: Including run-time hook 'pyi_rth_setuptools.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/rthooks'
+51362 INFO: Including run-time hook 'pyi_rth_pkgres.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/rthooks'
+51364 INFO: Including run-time hook 'pyi_rth_cryptography_openssl.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/_pyinstaller_hooks_contrib/rthooks'
+51365 INFO: Including run-time hook 'pyi_rth_mplconfig.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/rthooks'
+51366 INFO: Processing pre-find-module-path hook 'hook-_pyi_rth_utils.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks/pre_find_module_path'
+51367 INFO: Processing standard module hook 'hook-_pyi_rth_utils.py' from '/Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/hooks'
+51414 INFO: Creating base_library.zip...
+51430 INFO: Looking for dynamic libraries
+52025 INFO: Warnings written to /Users/seong-woo/Desktop/binance-trading-bot/build/BinanceTradingBot/warn-BinanceTradingBot.txt
+52174 INFO: Graph cross-reference written to /Users/seong-woo/Desktop/binance-trading-bot/build/BinanceTradingBot/xref-BinanceTradingBot.html
+52412 INFO: checking PYZ
+52412 INFO: Building PYZ because PYZ-00.toc is non existent
+52412 INFO: Building PYZ (ZlibArchive) /Users/seong-woo/Desktop/binance-trading-bot/build/BinanceTradingBot/PYZ-00.pyz
+54189 INFO: Building PYZ (ZlibArchive) /Users/seong-woo/Desktop/binance-trading-bot/build/BinanceTradingBot/PYZ-00.pyz completed successfully.
+54231 INFO: EXE target arch: arm64
+54231 INFO: Code signing identity: None
+54246 INFO: checking PKG
+54246 INFO: Building PKG because PKG-00.toc is non existent
+54246 INFO: Building PKG (CArchive) BinanceTradingBot.pkg
+72960 INFO: Building PKG (CArchive) BinanceTradingBot.pkg completed successfully.
+72979 INFO: Bootloader /Users/seong-woo/Library/Python/3.9/lib/python/site-packages/PyInstaller/bootloader/Darwin-64bit/run
+72979 INFO: checking EXE
+72979 INFO: Building EXE because EXE-00.toc is non existent
+72979 INFO: Building EXE from EXE-00.toc
+72979 INFO: Copying bootloader EXE to /Users/seong-woo/Desktop/binance-trading-bot/dist/BinanceTradingBot
+72980 INFO: Converting EXE to target arch (arm64)
+72998 INFO: Removing signature(s) from EXE
+73016 INFO: Modifying Mach-O image UUID(s) in EXE
+73112 INFO: Appending PKG archive to EXE
+73151 INFO: Fixing EXE headers for code signing
+73157 INFO: Re-signing the EXE
+73281 INFO: Building EXE from EXE-00.toc completed successfully.
+73301 INFO: Build complete! The results are available in: /Users/seong-woo/Desktop/binance-trading-bot/dist
+현 시스템 운영체제: darwin
+빌드 시작: BinanceTradingBot (Onefile mode)
+
+==================================================
+빌드 완료! 실행 파일 위치: dist/BinanceTradingBot
+==================================================
