@@ -123,20 +123,20 @@ class _Config:
         self.ETH_SYMBOL = get_env_str("ETH_SYMBOL", "ETH/USDT:USDT", env_data)
         self.ETH_TIMEFRAME = get_env_str("ETH_TIMEFRAME", "5m", env_data)
         self.INITIAL_CAPITAL = get_env_float("INITIAL_CAPITAL", 1000.0, env_data)
-        self.RISK_PER_TRADE_PCT = get_env_float("RISK_PER_TRADE_PCT", 0.02, env_data)
+        self.RISK_PER_TRADE_PCT = get_env_float("RISK_PER_TRADE_PCT", 0.02, env_data) # Default 2%
         self.FEE_RATE = get_env_float("FEE_RATE", 0.001, env_data)
         self.SLIPPAGE_RATE = get_env_float("SLIPPAGE_RATE", 0.001, env_data)
         
-        self.ACTIVE_STRATEGY = get_env_str("ACTIVE_STRATEGY", "GoldenCross", env_data)
-        self.EMA_FAST_LEN = get_env_int("EMA_FAST_LEN", 12, env_data)
-        self.EMA_SLOW_LEN = get_env_int("EMA_SLOW_LEN", 26, env_data)
+        self.ACTIVE_STRATEGY = get_env_str("ACTIVE_STRATEGY", "MultiFilterMomentum", env_data)
+        self.EMA_FAST_LEN = get_env_int("EMA_FAST_LEN", 10, env_data)
+        self.EMA_SLOW_LEN = get_env_int("EMA_SLOW_LEN", 50, env_data)
         self.RSI_LEN = get_env_int("RSI_LEN", 14, env_data)
         self.RSI_OVERBOUGHT = get_env_float("RSI_OVERBOUGHT", 70.0, env_data)
         self.RSI_OVERSOLD = get_env_float("RSI_OVERSOLD", 30.0, env_data)
         self.MACD_FAST = get_env_int("MACD_FAST", 12, env_data)
         self.MACD_SLOW = get_env_int("MACD_SLOW", 26, env_data)
         self.MACD_SIGNAL = get_env_int("MACD_SIGNAL", 9, env_data)
-        self.CUSTOM_PARAM_1 = get_env_float("CUSTOM_PARAM_1", 1.5, env_data)
+        self.CUSTOM_PARAM_1 = get_env_float("CUSTOM_PARAM_1", 200.0, env_data) # EMA_SLOW Filter
         self.CUSTOM_PARAM_2 = get_env_float("CUSTOM_PARAM_2", 80.0, env_data)
         
         self.ALLOW_LONG = get_env_bool("ALLOW_LONG", True, env_data)
