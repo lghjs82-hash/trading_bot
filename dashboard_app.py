@@ -383,5 +383,15 @@ async def update_symbol(data: dict):
 
 if __name__ == "__main__":
     import uvicorn
-    # Use string notation for app to support reload=True
-    uvicorn.run("dashboard_app:app", host="0.0.0.0", port=8000, reload=True)
+    # Use config.IS_FROZEN to toggle reload mode
+    # Reload mode must be OFF in a bundled EXE
+    is_reload = not config.IS_FROZEN
+    
+    if config.IS_FROZEN:
+        # Standard execution for EXE
+        logger.info("Running in FROZEN EXE mode. Reloader disabled for stability.")
+        uvicorn.run(app, host="0.0.0.0", port=8000, reload=False, workers=1)
+    else:
+        # Development mode
+        logger.info("Running in DEV mode. Reloader enabled.")
+        uvicorn.run("dashboard_app:app", host="0.0.0.0", port=8000, reload=True)
