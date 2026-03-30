@@ -3,3 +3,10 @@ pandas
 numpy
 matplotlib
 python-dotenv
+fastapi
+uvicorn
+jinja2
+python-multipart
+httptools
+websockets
+pyinstaller
