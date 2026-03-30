@@ -1,10 +1,11 @@
-import PyInstaller.__main__
 import os
 import sys
 import shutil
+import subprocess
 
 def bundle():
     print("현 시스템 운영체제:", sys.platform)
+    print("Python 실행 경로:", sys.executable)
     
     # Define assets to bundle
     # Format: (source_path, target_path_inside_bundle)
@@ -28,36 +29,55 @@ def bundle():
     
     print(f"빌드 시작: {name} (Onefile mode)")
     
-    try:
-        PyInstaller.__main__.run([
-            'dashboard_app.py',             # Entry point
-            '--onefile',                    # Single executable
-            '--name', 'BinanceTradingBot',   # Name
-            '--clean',                      # Clean cache
-            *add_data_args,                 # Include templates and strategies
-            '--hidden-import', 'uvicorn.protocols.http.httptools_impl',
-            '--hidden-import', 'uvicorn.protocols.http.h11_impl',
-            '--hidden-import', 'uvicorn.protocols.http.auto_impl',
-            '--hidden-import', 'uvicorn.protocols.websockets.websockets_impl',
-            '--hidden-import', 'uvicorn.protocols.websockets.auto_impl',
-            '--hidden-import', 'uvicorn.lifespan.on',
-            '--hidden-import', 'uvicorn.lifespan.off',
-            '--hidden-import', 'uvicorn.lifespan.auto',
-            '--hidden-import', 'jinja2.ext',
-            '--hidden-import', 'dotenv',
-            '--hidden-import', 'email.mime.text',
-            '--hidden-import', 'email.mime.multipart',
-            '--hidden-import', 'engineio.async_drivers.threading',
-        ])
-    except Exception as e:
-        print(f"\n[ERROR] PyInstaller build failed: {e}")
-        import traceback
-        traceback.print_exc()
-        sys.exit(1)
+    # Construct PyInstaller command
+    # Use 'python -m PyInstaller' to ensure it uses the current environment
+    cmd = [
+        sys.executable, '-m', 'PyInstaller',
+        'dashboard_app.py',             # Entry point
+        '--onefile',                    # Single executable
+        '--name', 'BinanceTradingBot',   # Name
+        '--clean',                      # Clean cache
+        '--noconfirm',                  # Don't ask for overwrite
+    ]
     
-    print("\n" + "="*50)
-    print(f"빌드 완료! 실행 파일 위치: dist/BinanceTradingBot")
-    print("="*50)
+    # Add data arguments
+    cmd.extend(add_data_args)
+    
+    # Add hidden imports
+    hidden_imports = [
+        'uvicorn.protocols.http.httptools_impl',
+        'uvicorn.protocols.http.h11_impl',
+        'uvicorn.protocols.http.auto_impl',
+        'uvicorn.protocols.websockets.websockets_impl',
+        'uvicorn.protocols.websockets.auto_impl',
+        'uvicorn.lifespan.on',
+        'uvicorn.lifespan.off',
+        'uvicorn.lifespan.auto',
+        'jinja2.ext',
+        'dotenv',
+        'email.mime.text',
+        'email.mime.multipart',
+        'engineio.async_drivers.threading',
+        'ccxt.base.exchange',
+    ]
+    
+    for hi in hidden_imports:
+        cmd.extend(['--hidden-import', hi])
+
+    print(f"실행 명령어: {' '.join(cmd)}")
+    
+    try:
+        # Run PyInstaller via subprocess to capture output clearly
+        result = subprocess.run(cmd, check=True, text=True)
+        print("\n" + "="*50)
+        print(f"빌드 완료! 실행 파일 위치: dist/{name}")
+        print("="*50)
+    except subprocess.CalledProcessError as e:
+        print(f"\n[ERROR] PyInstaller build failed with exit code {e.returncode}")
+        sys.exit(e.returncode)
+    except Exception as e:
+        print(f"\n[ERROR] Unexpected error during build: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     bundle()
