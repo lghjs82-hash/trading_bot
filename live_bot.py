@@ -359,6 +359,9 @@ class LiveBot:
         """Start the bot loop with self-healing (auto-restart on crash)"""
         self.is_running = True
         
+        # Log START immediately so user sees it in dashboard history even during auth
+        self._log_lifecycle_event("START", f"Bot initialization started on {config.ETH_SYMBOL}")
+        
         while self.is_running:
             try:
                 logger.info(f"Authenticating for {config.BOT_NAME}...")
@@ -386,7 +389,6 @@ class LiveBot:
 
                 logger.info(f"Starting {config.BOT_NAME} on {config.ETH_SYMBOL}")
                 self.update_state(status="Running")
-                self._log_lifecycle_event("START", f"Bot initialized on {config.ETH_SYMBOL}")
                 self.notifier.send(f"🟢 *Bot Started / Resumed*\nSymbol: `{config.ETH_SYMBOL}`")
                 
                 # Internal Bot Loop
@@ -402,8 +404,6 @@ class LiveBot:
                         logger.error(f"Error in internal loop: {e}")
                         self.update_state(logs=[f"Internal Error: {e}"])
                         time.sleep(5)
-                        # Continue inner loop if it's a minor error, 
-                        # or it will break to outer loop if critical
             
             except KeyboardInterrupt:
                 logger.info("Bot stopped by user")
@@ -415,7 +415,6 @@ class LiveBot:
                 self.update_state(status="Recovering", logs=[f"Bot crashed: {e}. Restarting..."])
                 self._log_lifecycle_event("RECOVERY", f"Auto-restart due to: {str(e)[:50]}...")
                 time.sleep(10)
-                # Outer loop will naturally restart the process
 
     def update_state(self, status=None, logs=None):
         """Update current bot state and write to shared JSON file (Atomic write for Windows)"""
@@ -423,7 +422,6 @@ class LiveBot:
             import tempfile
             import os
             
-            # 1. Load existing state
             state = {}
             if os.path.exists(config.STATE_FILE):
                 try:
@@ -432,20 +430,15 @@ class LiveBot:
                 except:
                     state = {}
 
-            # 2. Update values
             if status: state["status"] = status
             if logs:
                 current_logs = state.get("logs", [])
-                # Keep only last 20 logs
                 state["logs"] = (current_logs + logs)[-20:]
 
-            # 3. Safe Atomic Write (Temp file -> Rename)
-            # This prevents Windows "PermissionError" or "file in use" during read/write
             fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(config.STATE_FILE), suffix=".tmp")
             try:
                 with os.fdopen(fd, 'w') as f:
                     json.dump(state, f)
-                # On Windows, replace can fail if target is open, but it's much faster than normal open()
                 os.replace(temp_path, config.STATE_FILE)
             except Exception as e:
                 if os.path.exists(temp_path): os.remove(temp_path)
@@ -455,8 +448,10 @@ class LiveBot:
             logger.debug(f"Critical error in update_state: {e}")
 
     def _log_lifecycle_event(self, event, details=""):
-        """Record start/stop/recovery events to a persistent JSON file"""
+        """Record events to persistent JSON with atomic write to prevent Windows locking"""
         try:
+            import tempfile
+            import os
             from datetime import datetime
             
             history = []
@@ -471,23 +466,28 @@ class LiveBot:
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "event": event,
                 "details": details,
-                "strategy": config.ACTIVE_STRATEGY,
-                "symbol": config.ETH_SYMBOL,
-                "mode": config.ETH_MODE
+                "strategy": getattr(config, 'ACTIVE_STRATEGY', 'Unknown'),
+                "symbol": getattr(config, 'ETH_SYMBOL', 'Unknown'),
+                "mode": getattr(config, 'ETH_MODE', 'Unknown')
             }
             
-            # Prepend newest
-            history = [new_event] + history
-            # Keep last 100
-            history = history[:100]
+            history = ([new_event] + history)[:100]
             
-            with open(config.LIFECYCLE_FILE, "w") as f:
-                json.dump(history, f)
+            # Atomic Write for lifecycle file
+            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(config.LIFECYCLE_FILE), suffix=".tmp")
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(history, f)
+                os.replace(temp_path, config.LIFECYCLE_FILE)
+            except Exception as e:
+                if os.path.exists(temp_path): os.remove(temp_path)
+                logger.error(f"Lifecycle log write collision: {e}")
+                
         except Exception as e:
             logger.error(f"Failed to log lifecycle event: {e}")
 
     def stop(self):
-        """Stop the bot loop"""
+        """Stop the bot loop and log the event immediately"""
         logger.info("Stopping bot...")
         self.is_running = False
         self.update_state(status="Stopped")
