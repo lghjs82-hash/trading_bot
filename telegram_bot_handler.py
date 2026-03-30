@@ -301,25 +301,44 @@ class TelegramBotHandler:
     # ── Polling Loop ──
 
     def _poll_loop(self):
-        logger.info("Telegram command handler started.")
+        """Main Polling Loop with Supervisor for Resilience"""
+        logger.info("Telegram command handler (supervisor) started.")
+        self._running = True
+        
+        # Initial greeting indicating the daemon is alive
         self.send(
-            "🤖 *Trading Bot 명령어 수신 시작*\n"
-            "`/help` 를 입력하면 사용 가능한 명령어를 확인할 수 있습니다."
+            "🤖 *Bot Commander Ready*\n"
+            "━━━━━━━━━━━━━━\n"
+            "I'm now monitoring commands. Type `/help` for list."
         )
+
+        error_wait = 5 # Initial wait on error
+        
         while self._running:
-            updates = self._get_updates()
-            for update in updates:
-                self._offset = update["update_id"] + 1
-                try:
-                    self._handle_update(update)
-                except Exception as e:
-                    logger.error(f"Error handling update: {e}")
+            try:
+                updates = self._get_updates()
+                error_wait = 5 # Reset wait on success
+                
+                for update in updates:
+                    self._offset = update["update_id"] + 1
+                    try:
+                        self._handle_update(update)
+                    except Exception as e:
+                        logger.error(f"Error handling Telegram command: {e}")
+                        
+            except Exception as e:
+                logger.error(f"Telegram Polling Error: {e}. Retrying in {error_wait}s...")
+                time.sleep(error_wait)
+                # Exponential backoff (max 60s)
+                error_wait = min(60, error_wait * 2)
+        
+        logger.info("Telegram command handler stopped.")
 
     def start(self):
         if not self.enabled:
             logger.info("Telegram handler disabled (no token/chat_id).")
             return
-        self._running = True
+        # Start as a daemon thread so it doesn't block exit
         threading.Thread(target=self._poll_loop, daemon=True).start()
 
     def stop(self):
