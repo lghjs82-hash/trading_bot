@@ -356,57 +356,101 @@ class LiveBot:
         self.update_state(logs=logs)
 
     def start(self):
-        """Start the bot loop"""
-        logger.info(f"Authenticating for {config.BOT_NAME}...")
-        
-        # Retry loop for initial authentication
-        max_retries = 10
-        retry_count = 0
-        while not self.engine.check_auth():
-            retry_count += 1
-            if retry_count > max_retries:
-                logger.error("Authentication failed permanently after multiple retries. Exiting.")
-                self.update_state(status="Failed", logs=["Authentication failed permanently."])
-                return
-            
-            logger.warning(f"Authentication attempt {retry_count}/{max_retries} failed. Retrying in 10s...")
-            self.update_state(status="Retrying", logs=[f"Auth failed. Retrying ({retry_count}/{max_retries})..."])
-            time.sleep(10)
-            
-            # Re-init engine in case keys were changed
-            from execution_engine import ExecutionEngine
-            self.engine = ExecutionEngine()
-
-        logger.info(f"Starting {config.BOT_NAME} on {config.ETH_SYMBOL} ({config.ETH_TIMEFRAME})")
+        """Start the bot loop with self-healing (auto-restart on crash)"""
         self.is_running = True
-        self.update_state(status="Running")
-        self.notifier.send(
-            f"🟢 *Bot Started!*\n"
-            f"━━━━━━━━━━━━━━\n"
-            f"📌 Symbol: `{config.ETH_SYMBOL}`\n"
-            f"📈 Strategy: `{config.ACTIVE_STRATEGY}`\n"
-            f"🏷️ Mode: {'🧪 TESTNET' if config.ETH_MODE == 'TESTNET' else '💰 LIVE'}"
-        )
         
         while self.is_running:
             try:
-                # Reload config from .env
-                config.reload()
+                logger.info(f"Authenticating for {config.BOT_NAME}...")
                 
-                # High-Frequency Exit Check Loop (checks every 1s)
-                # This ensures we don't skip a profit target during the 30s main strategy sleep
-                for i in range(15): # 15 * 2s = 30s approximately
-                    if not self.is_running: break
-                    self.run_once() # Now run_once is also the trigger
-                    time.sleep(2) 
+                # Retry loop for initial authentication
+                max_retries = 10
+                retry_count = 0
+                while not self.engine.check_auth():
+                    if not self.is_running: return
+                    
+                    retry_count += 1
+                    if retry_count > max_retries:
+                        logger.error("Authentication failed permanently. Retrying in 60s...")
+                        self.update_state(status="Error", logs=["Auth failed. Waiting 60s to retry..."])
+                        time.sleep(60)
+                        retry_count = 0 # Reset to try again later
+                        continue
+                    
+                    logger.warning(f"Authentication attempt {retry_count}/{max_retries} failed. Retrying in 10s...")
+                    self.update_state(status="Retrying", logs=[f"Auth failed. Retrying ({retry_count}/{max_retries})..."])
+                    time.sleep(10)
+                    
+                    from execution_engine import ExecutionEngine
+                    self.engine = ExecutionEngine()
+
+                logger.info(f"Starting {config.BOT_NAME} on {config.ETH_SYMBOL}")
+                self.update_state(status="Running")
+                self.notifier.send(f"🟢 *Bot Started / Resumed*\nSymbol: `{config.ETH_SYMBOL}`")
+                
+                # Internal Bot Loop
+                while self.is_running:
+                    try:
+                        config.reload()
+                        # Monitoring loop (every 2s, 15 times = 30s approximate cycle)
+                        for i in range(15):
+                            if not self.is_running: break
+                            self.run_once()
+                            time.sleep(2)
+                    except Exception as e:
+                        logger.error(f"Error in internal loop: {e}")
+                        self.update_state(logs=[f"Internal Error: {e}"])
+                        time.sleep(5)
+                        # Continue inner loop if it's a minor error, 
+                        # or it will break to outer loop if critical
+            
             except KeyboardInterrupt:
                 logger.info("Bot stopped by user")
                 self.is_running = False
                 self.update_state(status="Stopped")
+                break
             except Exception as e:
-                logger.error(f"Error in main loop: {e}")
-                self.update_state(status="Error", logs=[str(e)])
+                logger.error(f"CRITICAL: Bot thread crashed: {e}. Auto-restarting in 10s...")
+                self.update_state(status="Recovering", logs=[f"Bot crashed: {e}. Restarting..."])
                 time.sleep(10)
+                # Outer loop will naturally restart the process
+
+    def update_state(self, status=None, logs=None):
+        """Update current bot state and write to shared JSON file (Atomic write for Windows)"""
+        try:
+            import tempfile
+            import os
+            
+            # 1. Load existing state
+            state = {}
+            if os.path.exists(STATE_FILE):
+                try:
+                    with open(STATE_FILE, "r") as f:
+                        state = json.load(f)
+                except:
+                    state = {}
+
+            # 2. Update values
+            if status: state["status"] = status
+            if logs:
+                current_logs = state.get("logs", [])
+                # Keep only last 20 logs
+                state["logs"] = (current_logs + logs)[-20:]
+
+            # 3. Safe Atomic Write (Temp file -> Rename)
+            # This prevents Windows "PermissionError" or "file in use" during read/write
+            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(STATE_FILE), suffix=".tmp")
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(state, f)
+                # On Windows, replace can fail if target is open, but it's much faster than normal open()
+                os.replace(temp_path, STATE_FILE)
+            except Exception as e:
+                if os.path.exists(temp_path): os.remove(temp_path)
+                logger.debug(f"State update collision: {e}")
+                
+        except Exception as e:
+            logger.debug(f"Critical error in update_state: {e}")
 
     def stop(self):
         """Stop the bot loop"""

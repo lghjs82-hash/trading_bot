@@ -22,7 +22,8 @@ class ExecutionEngine:
             'options': {
                 'defaultType': 'future',
                 'test': self.mode == "TESTNET"
-            }
+            },
+            'timeout': 5000, # 5 second timeout to prevent freezing
         }
         
         self.exchange = ccxt.binanceusdm(exchange_params)
