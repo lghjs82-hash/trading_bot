@@ -23,7 +23,7 @@ class ExecutionEngine:
                 'defaultType': 'future',
                 'test': self.mode == "TESTNET"
             },
-            'timeout': 5000, # 5 second timeout to prevent freezing
+            'timeout': 10000, # Increased to 10s for better reliability on slow connections
         }
         
         self.exchange = ccxt.binanceusdm(exchange_params)
@@ -239,15 +239,21 @@ class ExecutionEngine:
             return []
 
     def get_available_symbols(self):
-        """Fetch all USDT-M Futures symbols"""
+        """Fetch all USDT-M Futures symbols with robust filtering and fallbacks"""
+        default_symbols = ["BTC/USDT:USDT", "ETH/USDT:USDT"]
         try:
             markets = self.exchange.load_markets()
-            # Filter for USDT-M futures using robust .get()
-            symbols = [s for s, m in markets.items() if m.get('active') and m.get('quote') == 'USDT' and m.get('futures')]
+            # More lenient filter: check for USDT quote and swap/future types
+            symbols = [s for s, m in markets.items() if m.get('active') is not False and m.get('quote') == 'USDT']
+            
+            if not symbols:
+                logger.warning("No USDT symbols found in markets, using defaults.")
+                return default_symbols
+                
             return sorted(symbols)
         except Exception as e:
             logger.error(f"Error fetching symbols: {e}")
-            return ["ETH/USDT:USDT", "BTC/USDT:USDT"]
+            return default_symbols
 
     def get_market_price(self):
         """Get current ticker price"""

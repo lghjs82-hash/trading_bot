@@ -1116,11 +1116,22 @@
             updateMarketData();
         }
 
-        async function loadSymbols() {
+        async function loadSymbols(retryCount = 0) {
             try {
                 const response = await fetch('/api/symbols');
-                const symbols = await response.json();
+                let symbols = await response.json();
                 const selector = document.getElementById('symbol-selector');
+                
+                // Safety fallback if backend returns empty due to connection issues
+                if ((!symbols || symbols.length === 0) && retryCount < 2) {
+                    console.log("Symbols list empty, retrying in 1s...");
+                    setTimeout(() => loadSymbols(retryCount + 1), 1000);
+                    return;
+                }
+                
+                if (!symbols || symbols.length === 0) {
+                    symbols = ["BTC/USDT:USDT", "ETH/USDT:USDT"];
+                }
                 
                 // Get current symbol from config endpoint directly to ensure sync
                 const configResponse = await fetch('/api/config/current_symbol');
@@ -1134,6 +1145,11 @@
                 if (candleSeries) updateChart();
             } catch (e) {
                 console.error("Error loading symbols", e);
+                // Last resort fallback
+                const selector = document.getElementById('symbol-selector');
+                if (selector && selector.options.length <= 1) {
+                    selector.innerHTML = '<option value="BTC/USDT:USDT">BTC/USDT:USDT</option><option value="ETH/USDT:USDT">ETH/USDT:USDT</option>';
+                }
             }
         }
 
