@@ -386,6 +386,7 @@ class LiveBot:
 
                 logger.info(f"Starting {config.BOT_NAME} on {config.ETH_SYMBOL}")
                 self.update_state(status="Running")
+                self._log_lifecycle_event("START", f"Bot initialized on {config.ETH_SYMBOL}")
                 self.notifier.send(f"🟢 *Bot Started / Resumed*\nSymbol: `{config.ETH_SYMBOL}`")
                 
                 # Internal Bot Loop
@@ -412,6 +413,7 @@ class LiveBot:
             except Exception as e:
                 logger.error(f"CRITICAL: Bot thread crashed: {e}. Auto-restarting in 10s...")
                 self.update_state(status="Recovering", logs=[f"Bot crashed: {e}. Restarting..."])
+                self._log_lifecycle_event("RECOVERY", f"Auto-restart due to: {str(e)[:50]}...")
                 time.sleep(10)
                 # Outer loop will naturally restart the process
 
@@ -423,9 +425,9 @@ class LiveBot:
             
             # 1. Load existing state
             state = {}
-            if os.path.exists(STATE_FILE):
+            if os.path.exists(config.STATE_FILE):
                 try:
-                    with open(STATE_FILE, "r") as f:
+                    with open(config.STATE_FILE, "r") as f:
                         state = json.load(f)
                 except:
                     state = {}
@@ -439,12 +441,12 @@ class LiveBot:
 
             # 3. Safe Atomic Write (Temp file -> Rename)
             # This prevents Windows "PermissionError" or "file in use" during read/write
-            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(STATE_FILE), suffix=".tmp")
+            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(config.STATE_FILE), suffix=".tmp")
             try:
                 with os.fdopen(fd, 'w') as f:
                     json.dump(state, f)
                 # On Windows, replace can fail if target is open, but it's much faster than normal open()
-                os.replace(temp_path, STATE_FILE)
+                os.replace(temp_path, config.STATE_FILE)
             except Exception as e:
                 if os.path.exists(temp_path): os.remove(temp_path)
                 logger.debug(f"State update collision: {e}")
@@ -452,11 +454,44 @@ class LiveBot:
         except Exception as e:
             logger.debug(f"Critical error in update_state: {e}")
 
+    def _log_lifecycle_event(self, event, details=""):
+        """Record start/stop/recovery events to a persistent JSON file"""
+        try:
+            from datetime import datetime
+            
+            history = []
+            if os.path.exists(config.LIFECYCLE_FILE):
+                try:
+                    with open(config.LIFECYCLE_FILE, "r") as f:
+                        history = json.load(f)
+                except:
+                    history = []
+            
+            new_event = {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "event": event,
+                "details": details,
+                "strategy": config.ACTIVE_STRATEGY,
+                "symbol": config.ETH_SYMBOL,
+                "mode": config.ETH_MODE
+            }
+            
+            # Prepend newest
+            history = [new_event] + history
+            # Keep last 100
+            history = history[:100]
+            
+            with open(config.LIFECYCLE_FILE, "w") as f:
+                json.dump(history, f)
+        except Exception as e:
+            logger.error(f"Failed to log lifecycle event: {e}")
+
     def stop(self):
         """Stop the bot loop"""
         logger.info("Stopping bot...")
         self.is_running = False
         self.update_state(status="Stopped")
+        self._log_lifecycle_event("STOP", "Manual stop triggered via Dashboard/Telegram")
         self.notifier.send(
             f"🔴 *Bot Stopped!*\n"
             f"━━━━━━━━━━━━━━\n"

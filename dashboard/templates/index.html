@@ -457,8 +457,9 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('dashboard')">Dashboard</button>
-            <button class="tab-btn" onclick="showTab('market')">Market</button>
-            <button class="tab-btn" onclick="showTab('trades')">Trades History</button>
+            <button class="tab-btn" onclick="showTab('market')">Market Overview</button>
+            <button class="tab-btn" onclick="showTab('trades')">Trade History</button>
+            <button class="tab-btn" onclick="showTab('bot-history')">🛡️ Bot History</button>
             <button class="tab-btn" onclick="showTab('settings')">Settings</button>
         </div>
 
@@ -756,6 +757,29 @@
             <div style="font-size: 11px; color: #8b949e; margin-top: -20px; margin-bottom: 20px; font-style: italic; padding-left: 5px;">
                 Note: Frequent '0' values indicate IP rate-limiting (HTTP 429) by Google Trends on the hosting network, which suppresses the raw score to prevent application crashing.
             </div>
+        </div>
+
+        <div id="bot-history" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;">🛡️ Bot Lifecycle & Activity History</h3>
+                <button class="btn" onclick="loadBotHistory()" style="padding: 5px 12px; font-size: 12px;">🔄 Refresh</button>
+            </div>
+            <div class="card" style="padding: 0; overflow: hidden; border: 1px solid var(--border);">
+                <table style="width:100%; color:white; border-collapse: collapse; font-size: 13px; text-align: left;">
+                    <thead style="background: rgba(255,255,255,0.03);">
+                        <tr style="border-bottom: 1px solid var(--border); color: #8b949e;">
+                            <th style="padding: 12px 15px;">Timestamp</th>
+                            <th style="padding: 12px 15px;">Event</th>
+                            <th style="padding: 12px 15px;">Strategy / Mode</th>
+                            <th style="padding: 12px 15px;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bot-history-body">
+                        <!-- History items will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size: 11px; color: #8b949e; margin-top: 10px;">* This history is persistent and tracks when the bot was started, stopped, or recovered from errors.</p>
         </div>
 
         <div id="trades" class="tab-content">
@@ -1332,6 +1356,7 @@
             if (tabId === 'settings') loadSettings();
             if (tabId === 'market' || tabId === 'dashboard') updateMarketData();
             if (tabId === 'trades') updateTradeHistory();
+            if (tabId === 'bot-history') loadBotHistory();
         }
 
         function changeMarketInterval(val) {
@@ -1400,6 +1425,51 @@
                 allTrades = await response.json();
                 renderTrades();
             } catch (e) {}
+        }
+
+        async function loadBotHistory() {
+            const body = document.getElementById('bot-history-body');
+            if (body) body.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #8b949e;">Loading history...</td></tr>';
+            
+            try {
+                const response = await fetch('/api/bot/history');
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    if (body) body.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #8b949e;">No history recorded yet.</td></tr>';
+                    return;
+                }
+                
+                if (body) body.innerHTML = data.map(item => {
+                    let eventBadge = '';
+                    if (item.event === 'START') {
+                        eventBadge = '<span style="background: rgba(35, 134, 54, 0.2); color: #3fb950; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold;">START</span>';
+                    } else if (item.event === 'STOP') {
+                        eventBadge = '<span style="background: rgba(248, 81, 73, 0.2); color: #f85149; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold;">STOP</span>';
+                    } else if (item.event === 'RECOVERY') {
+                        eventBadge = '<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold;">RECOVERY</span>';
+                    } else {
+                        eventBadge = `<span style="background: rgba(139, 148, 158, 0.2); color: #8b949e; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: bold;">${item.event}</span>`;
+                    }
+                    
+                    const modeTag = item.mode === 'TESTNET' ? '<span style="color: #bc8cff;">Testnet</span>' : '<span style="color: #f59e0b;">Mainnet</span>';
+                    
+                    return `
+                        <tr style="border-bottom: 1px solid rgba(139, 148, 158, 0.1);">
+                            <td style="padding: 12px 15px; color: #8b949e;">${item.timestamp}</td>
+                            <td style="padding: 12px 15px;">${eventBadge}</td>
+                            <td style="padding: 12px 15px;">
+                                <div style="font-weight: bold;">${item.strategy}</div>
+                                <div style="font-size: 11px; opacity: 0.7;">${modeTag} • ${item.symbol}</div>
+                            </td>
+                            <td style="padding: 12px 15px; color: #c9d1d9;">${item.details || '-'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error("History load error:", err);
+                if (body) body.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #f85149;">Error loading history.</td></tr>';
+            }
         }
 
         function setTradeSort(col) {

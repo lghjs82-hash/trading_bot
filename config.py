@@ -18,6 +18,8 @@ else:
     BASE_DIR = EXE_DIR
 
 ENV_PATH = EXE_DIR / ".env"
+STATE_FILE = EXE_DIR / "dashboard_state.json"
+LIFECYCLE_FILE = EXE_DIR / "bot_lifecycle.json"
 
 # Configure logging for config module
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

@@ -73,9 +73,6 @@ bot_manager = BotManager()
 templates = Jinja2Templates(directory=str(config.BASE_DIR / "dashboard" / "templates"))
 # app.mount("/static", StaticFiles(directory="dashboard/static"), name="static")
 
-# Shared state file path
-STATE_FILE = config.EXE_DIR / "dashboard_state.json"
-
 def get_state():
     state = {
         "status": "Running" if bot_manager.running else "Stopped",
@@ -88,9 +85,9 @@ def get_state():
         "exit_profit_pct": float(getattr(config, "EXIT_PROFIT_PCT", 0.5)),
         "exit_strategy_mode": str(getattr(config, "EXIT_STRATEGY_MODE", "OFF"))
     }
-    if os.path.exists(STATE_FILE):
+    if os.path.exists(config.STATE_FILE):
         try:
-            with open(STATE_FILE, "r") as f:
+            with open(config.STATE_FILE, "r") as f:
                 disk_state = json.load(f)
                 state.update(disk_state)
         except:
@@ -230,6 +227,17 @@ async def force_exit():
             
         return {"message": "Force exit successful", "order": str(result)}
     return {"error": "Force exit failed"}
+
+@app.get("/api/bot/history")
+def get_bot_history():
+    history = []
+    if os.path.exists(config.LIFECYCLE_FILE):
+        try:
+            with open(config.LIFECYCLE_FILE, "r") as f:
+                history = json.load(f)
+        except:
+            pass
+    return JSONResponse(content=history, headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"})
 
 @app.post("/api/telegram/test")
 async def test_telegram():
