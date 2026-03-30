@@ -56,6 +56,11 @@ jobs:
         --hidden-import email.mime.multipart `
         --hidden-import engineio.async_drivers.threading `
         --hidden-import ccxt.base.exchange `
+        --hidden-import yfinance `
+        --hidden-import requests `
+        --hidden-import feedparser `
+        --hidden-import pytrends `
+        --hidden-import lxml `
         dashboard_app.py
 
     - name: Upload Executable

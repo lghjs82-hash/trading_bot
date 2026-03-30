@@ -72,16 +72,28 @@ def get_env_bool(name: str, default: bool, env_data: dict = None) -> bool:
 
 class _Config:
     def __init__(self):
-        self.reload()
+        self._last_mtime = 0
+        self.reload(force=True)
 
-    def reload(self):
+    def reload(self, force=False):
         from dotenv import dotenv_values
         
         # Run wizard if needed
         if not ENV_PATH.exists():
             setup_wizard()
 
-        print(f"\n[DEBUG] --- Config Reload Start ---")
+        # Caching logic: check mtime of .env
+        try:
+            current_mtime = os.path.getmtime(str(ENV_PATH))
+            if not force and current_mtime <= self._last_mtime:
+                # No change since last load, skip disk read
+                return
+            self._last_mtime = current_mtime
+        except Exception as e:
+            # If error getting mtime, proceed with reload anyway
+            pass
+
+        print(f"\n[DEBUG] --- Config Reload Start (mtime changed) ---")
         print(f"[DEBUG] Looking for .env at: {ENV_PATH}")
         
         env_data = {}
@@ -149,17 +161,18 @@ class _Config:
         # Explicitly broadcast to module level
         module_dict = globals()
         for key, value in self.__dict__.items():
-            if not key.startswith('__'):
+            if not key.startswith('_'): # Don't export private members
                 module_dict[key] = value
         print(f"[DEBUG] --- Config Reload End ---\n")
 
 _c = _Config()
 
-def reload():
-    _c.reload()
+def reload(force=False):
+    _c.reload(force=force)
     module_dict = globals()
     for key, value in _c.__dict__.items():
-        if not key.startswith('__'):
+        if not key.startswith('_'):
             module_dict[key] = value
 
-reload()
+# Initial sync
+reload(force=True)

@@ -60,7 +60,9 @@ class ExecutionEngine:
         """Verify API keys and connection"""
         try:
             balance = self.exchange.fetch_balance()
-            logger.info(f"Authentication successful. Total USDT: {balance.get('USDT', {}).get('total', 0)}")
+            # More robust balance logging (some accounts might not have USDT key if 0)
+            usdt_total = balance.get('USDT', {}).get('total', 0.0)
+            logger.info(f"Authentication successful. Total USDT: {usdt_total}")
             return True
         except Exception as e:
             logger.error(f"Authentication failed: {e}")
@@ -239,8 +241,8 @@ class ExecutionEngine:
         """Fetch all USDT-M Futures symbols"""
         try:
             markets = self.exchange.load_markets()
-            # Filter for USDT-M futures
-            symbols = [s for s, m in markets.items() if m['active'] and m['quote'] == 'USDT' and m['futures']]
+            # Filter for USDT-M futures using robust .get()
+            symbols = [s for s, m in markets.items() if m.get('active') and m.get('quote') == 'USDT' and m.get('futures')]
             return sorted(symbols)
         except Exception as e:
             logger.error(f"Error fetching symbols: {e}")

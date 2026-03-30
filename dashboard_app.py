@@ -107,7 +107,6 @@ async def read_item(request: Request):
 
 @app.get("/api/state")
 def get_state_api():
-    config.reload()
     from dotenv import dotenv_values
     file_raw_val = "N/A"
     if config.ENV_PATH.exists():
@@ -234,13 +233,11 @@ async def force_exit():
 
 @app.get("/api/orderbook")
 def get_orderbook():
-    config.reload()
     engine = get_engine()
     return engine.get_order_book(config.ETH_SYMBOL, limit=10)
 
 @app.get("/api/config")
 def get_config():
-    config.reload()
     from dotenv import dotenv_values
     config_vars = {}
     if config.ENV_PATH.exists():
@@ -275,21 +272,18 @@ async def update_config(data: dict):
 
 @app.get("/api/market")
 def get_market(interval: str = "24h"):
-    config.reload()
     engine = get_engine()
     data = engine.get_market_data(config.ETH_SYMBOL, interval=interval)
     return data or {"error": "Could not fetch market data"}
 
 @app.get("/api/trades")
 def get_trades():
-    config.reload()
     engine = get_engine()
     trades = engine.get_trade_history(config.ETH_SYMBOL)
     return trades
 
 @app.get("/api/history")
 def get_history(timeframe: str = None, limit: int = 100):
-    config.reload()
     tf = timeframe or config.ETH_TIMEFRAME
     engine = get_engine()
     return engine.get_ohlcv(config.ETH_SYMBOL, tf, limit)
@@ -297,7 +291,6 @@ def get_history(timeframe: str = None, limit: int = 100):
 @app.get("/api/macro")
 async def get_macro_data():
     import asyncio
-    config.reload()
     engine = get_engine()
     macro_svc = get_macro_svc()
     

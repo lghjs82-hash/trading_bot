@@ -357,10 +357,25 @@ class LiveBot:
 
     def start(self):
         """Start the bot loop"""
-        if not self.engine.check_auth():
-            logger.error("Authentication failed. Check your API keys in .env")
-            self.update_state(status="Failed", logs=["Authentication failed."])
-            return
+        logger.info(f"Authenticating for {config.BOT_NAME}...")
+        
+        # Retry loop for initial authentication
+        max_retries = 10
+        retry_count = 0
+        while not self.engine.check_auth():
+            retry_count += 1
+            if retry_count > max_retries:
+                logger.error("Authentication failed permanently after multiple retries. Exiting.")
+                self.update_state(status="Failed", logs=["Authentication failed permanently."])
+                return
+            
+            logger.warning(f"Authentication attempt {retry_count}/{max_retries} failed. Retrying in 10s...")
+            self.update_state(status="Retrying", logs=[f"Auth failed. Retrying ({retry_count}/{max_retries})..."])
+            time.sleep(10)
+            
+            # Re-init engine in case keys were changed
+            from execution_engine import ExecutionEngine
+            self.engine = ExecutionEngine()
 
         logger.info(f"Starting {config.BOT_NAME} on {config.ETH_SYMBOL} ({config.ETH_TIMEFRAME})")
         self.is_running = True

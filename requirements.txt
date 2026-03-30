@@ -10,3 +10,8 @@ python-multipart
 httptools
 websockets
 pyinstaller
+yfinance
+requests
+feedparser
+pytrends
+lxml
