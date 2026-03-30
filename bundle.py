@@ -28,19 +28,32 @@ def bundle():
     
     print(f"빌드 시작: {name} (Onefile mode)")
     
-    PyInstaller.__main__.run([
-        'dashboard_app.py',             # Entry point
-        '--onefile',                    # Single executable
-        '--name', 'BinanceTradingBot',   # Name
-        '--clean',                      # Clean cache
-        *add_data_args,                 # Include templates and strategies
-        '--hidden-import', 'uvicorn.protocols.http.httptools_impl',
-        '--hidden-import', 'uvicorn.protocols.http.h11_impl',
-        '--hidden-import', 'uvicorn.protocols.websockets.websockets_impl',
-        '--hidden-import', 'uvicorn.lifespan.on',
-        '--hidden-import', 'jinja2.ext',
-        '--hidden-import', 'dotenv',
-    ])
+    try:
+        PyInstaller.__main__.run([
+            'dashboard_app.py',             # Entry point
+            '--onefile',                    # Single executable
+            '--name', 'BinanceTradingBot',   # Name
+            '--clean',                      # Clean cache
+            *add_data_args,                 # Include templates and strategies
+            '--hidden-import', 'uvicorn.protocols.http.httptools_impl',
+            '--hidden-import', 'uvicorn.protocols.http.h11_impl',
+            '--hidden-import', 'uvicorn.protocols.http.auto_impl',
+            '--hidden-import', 'uvicorn.protocols.websockets.websockets_impl',
+            '--hidden-import', 'uvicorn.protocols.websockets.auto_impl',
+            '--hidden-import', 'uvicorn.lifespan.on',
+            '--hidden-import', 'uvicorn.lifespan.off',
+            '--hidden-import', 'uvicorn.lifespan.auto',
+            '--hidden-import', 'jinja2.ext',
+            '--hidden-import', 'dotenv',
+            '--hidden-import', 'email.mime.text',
+            '--hidden-import', 'email.mime.multipart',
+            '--hidden-import', 'engineio.async_drivers.threading',
+        ])
+    except Exception as e:
+        print(f"\n[ERROR] PyInstaller build failed: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
     
     print("\n" + "="*50)
     print(f"빌드 완료! 실행 파일 위치: dist/BinanceTradingBot")
