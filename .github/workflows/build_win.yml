@@ -35,7 +35,28 @@ jobs:
 
     - name: Build with PyInstaller
       run: |
-        python bundle.py
+        python -m PyInstaller `
+        --onefile `
+        --name BinanceTradingBot `
+        --clean `
+        --noconfirm `
+        --add-data "dashboard/templates;dashboard/templates" `
+        --add-data "strategies;strategies" `
+        --hidden-import uvicorn.protocols.http.httptools_impl `
+        --hidden-import uvicorn.protocols.http.h11_impl `
+        --hidden-import uvicorn.protocols.http.auto_impl `
+        --hidden-import uvicorn.protocols.websockets.websockets_impl `
+        --hidden-import uvicorn.protocols.websockets.auto_impl `
+        --hidden-import uvicorn.lifespan.on `
+        --hidden-import uvicorn.lifespan.off `
+        --hidden-import uvicorn.lifespan.auto `
+        --hidden-import jinja2.ext `
+        --hidden-import dotenv `
+        --hidden-import email.mime.text `
+        --hidden-import email.mime.multipart `
+        --hidden-import engineio.async_drivers.threading `
+        --hidden-import ccxt.base.exchange `
+        dashboard_app.py
 
     - name: Upload Executable
       uses: actions/upload-artifact@v4
