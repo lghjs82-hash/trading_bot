@@ -438,7 +438,12 @@ class ExecutionEngine:
                 }
             return result
         except Exception as e:
-            logger.error(f"Error fetching order book: {e}")
+            err_msg = str(e)
+            # Filter out long HTML from 502/504 errors
+            if "<html>" in err_msg.lower() or "502" in err_msg or "504" in err_msg:
+                logger.warning(f"Error fetching order book: Binance Server Temporary Unavailable (502/504)")
+            else:
+                logger.error(f"Error fetching order book: {err_msg}")
             return {"bids": [], "asks": []}
 
     def get_futures_metrics(self, symbol):
@@ -457,7 +462,11 @@ class ExecutionEngine:
             elif oi and "baseVolume" in oi:
                 metrics["open_interest"] = float(oi["baseVolume"])
         except Exception as e:
-            logger.warning(f"Error fetching futures metrics for {symbol}: {e}")
+            err_msg = str(e)
+            if "<html>" in err_msg.lower() or "502" in err_msg:
+                logger.debug(f"Error fetching futures metrics for {symbol}: Binance Server Error (502)")
+            else:
+                logger.warning(f"Error fetching futures metrics for {symbol}: {err_msg}")
             
         return metrics
 
@@ -496,7 +505,11 @@ class ExecutionEngine:
             
             return default
         except Exception as e:
-            logger.error(f"Error fetching position for {symbol}: {e}")
+            err_msg = str(e)
+            if "<html>" in err_msg.lower() or "502" in err_msg:
+                logger.warning(f"Error fetching position for {symbol}: Binance Server Error (502)")
+            else:
+                logger.error(f"Error fetching position for {symbol}: {err_msg}")
             return default
 
     def get_total_balance(self):
@@ -505,7 +518,11 @@ class ExecutionEngine:
             balance = self.exchange.fetch_balance()
             return balance.get('USDT', {}).get('total', 0.0)
         except Exception as e:
-            logger.error(f"Error fetching balance: {e}")
+            err_msg = str(e)
+            if "<html>" in err_msg.lower() or "502" in err_msg:
+                logger.warning(f"Error fetching balance: Binance Server Error (502)")
+            else:
+                logger.error(f"Error fetching balance: {err_msg}")
             return 0.0
 
     def close_position(self, symbol):
@@ -533,5 +550,9 @@ class ExecutionEngine:
             
             return order
         except Exception as e:
-            logger.error(f"Error in close_position: {e}")
+            err_msg = str(e)
+            if "<html>" in err_msg.lower() or "502" in err_msg:
+                logger.error(f"Error in close_position: Binance Server Error (502)")
+            else:
+                logger.error(f"Error in close_position: {err_msg}")
             return None
